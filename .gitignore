@@ -39,6 +39,7 @@ Desktop.ini
 *.swp
 *.swo
 docker-compose.yml
+.docker/
 # ------------------------
 # Backups and dumps
 # ------------------------
@@ -46,4 +47,5 @@ docker-compose.yml
 *.tar.gz
 *.zip
 *.log
+wp-content/ai1wm-backups/
 
