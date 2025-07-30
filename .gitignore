@@ -1,0 +1,49 @@
+# ------------------------
+# WordPress core (don't track)
+# ------------------------
+/wp-admin/
+/wp-includes/
+/license.txt
+/readme.html
+/wp-*.php
+xmlrpc.php
+index.php
+
+# ------------------------
+# Config files with secrets
+# ------------------------
+wp-config.local.php
+wp-config.production.php
+
+
+# ------------------------
+# Content uploads
+# ------------------------
+wp-content/uploads/
+
+# ------------------------
+# Ignore all plugins EXCEPT custom ones (optional)
+# Uncomment these lines if you want only custom plugins tracked
+# wp-content/plugins/*
+# !wp-content/plugins/my-custom-plugin/
+
+# ------------------------
+# OS/editor/system files
+# ------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ------------------------
+# Backups and dumps
+# ------------------------
+*.sql
+*.tar.gz
+*.zip
+*.log
+

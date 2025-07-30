@@ -1,0 +1,53 @@
+/* Utility Classes */
+.gold-border {
+    border: 2px solid var(--border-gold);
+    border-radius: var(--border-radius-large);
+    box-shadow:
+        0 0 30px var(--glow-gold),
+        inset 0 0 50px rgba(255, 215, 0, 0.05);
+}
+
+.gold-background-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center,
+            rgba(255, 215, 0, 0.02) 0%,
+            transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--primary-gold);
+    margin-bottom: 40px;
+    text-shadow:
+        0 0 10px rgba(255, 215, 0, 0.5),
+        var(--text-shadow-dark);
+    font-family: 'Big Shoulders Display', sans-serif;
+    letter-spacing: 2px;
+}
+
+.text-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    text-align: justify;
+    margin-bottom: 30px;
+    text-shadow: var(--text-shadow-light);
+}
+
+.section-container {
+    width: 75vw;
+    max-width: 900px;
+    margin: 60px auto;
+    padding: var(--section-padding);
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+}

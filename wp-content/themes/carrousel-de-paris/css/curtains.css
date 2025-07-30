@@ -1,0 +1,69 @@
+/* Curtain Styles */
+.curtain-wrapper {
+    position: fixed;
+    top: 0;
+    width: 200px;
+    height: 100vh;
+    z-index: 1000;
+    overflow: hidden;
+    animation: hideCurtainWrapper 0.1s ease-in-out 4s forwards;
+}
+
+.curtain-wrapper-left {
+    left: 0;
+}
+
+.curtain-wrapper-right {
+    right: 0;
+}
+
+.curtain {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 2s ease-in-out;
+}
+
+.curtain-left {
+    animation: openCurtainLeft 3s ease-in-out 1s forwards;
+}
+
+.curtain-right {
+    animation: openCurtainRight 3s ease-in-out 1s forwards;
+}
+
+.flipped {
+    transform: scaleX(-1);
+}
+
+@keyframes openCurtainLeft {
+    from {
+        transform: translateX(0%);
+    }
+
+    to {
+        transform: translateX(-75%);
+    }
+}
+
+@keyframes openCurtainRight {
+    from {
+        transform: scaleX(-1) translateX(0%);
+    }
+
+    to {
+        transform: scaleX(-1) translateX(-75%);
+    }
+}
+
+@keyframes hideCurtainWrapper {
+    from {
+        width: 200px;
+        pointer-events: auto;
+    }
+
+    to {
+        width: 0;
+        pointer-events: none;
+    }
+}

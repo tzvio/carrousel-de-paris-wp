@@ -1,0 +1,16 @@
+/* CSS Custom Properties (Variables) */
+:root {
+    --primary-gold: gold;
+    --secondary-gold: #d4af37;
+    --bg-dark: #0b0b0b;
+    --text-light: #f0f0f0;
+    --text-shadow-dark: 2px 2px 4px black;
+    --text-shadow-light: 1px 1px 2px black;
+    --border-gold: rgba(255, 215, 0, 0.3);
+    --glow-gold: rgba(255, 215, 0, 0.1);
+    --transition-smooth: all 0.3s ease;
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --section-padding: 60px 40px;
+    --border-radius: 12px;
+    --border-radius-large: 20px;
+}

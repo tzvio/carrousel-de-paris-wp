@@ -1,0 +1,108 @@
+/* Mobile Styles - Portrait only */
+@media (max-width: 480px) {
+
+    /* Hide curtains completely on mobile after animation */
+    .curtain-wrapper {
+        width: 50vw;
+        z-index: 999;
+        pointer-events: none;
+        animation: hideCurtainWrapperMobile 0.1s ease-in-out 2.5s forwards;
+    }
+
+    /* Mobile animation - hide them completely */
+    @keyframes openCurtainLeft {
+        0% {
+            transform: translateX(0%);
+            opacity: 1;
+        }
+
+        70% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+    }
+
+    @keyframes openCurtainRight {
+        0% {
+            transform: scaleX(-1) translateX(0%);
+            opacity: 1;
+        }
+
+        70% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: scaleX(-1) translateX(-100%);
+            opacity: 0;
+        }
+    }
+
+    @keyframes hideCurtainWrapperMobile {
+        from {
+            width: 50vw;
+            pointer-events: none;
+        }
+
+        to {
+            width: 0;
+            pointer-events: none;
+        }
+    }
+
+    /* Shorter animation duration for mobile */
+    .curtain-left,
+    .curtain-right {
+        animation-duration: 2s;
+        animation-delay: 0.5s;
+    }
+
+    .phoenix,
+    .lion {
+        max-width: 25%;
+    }
+
+    .dancer {
+        opacity: 0.25;
+    }
+
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    .glow-text {
+        font-size: 3rem;
+    }
+
+    .about-title,
+    .contact-title {
+        font-size: 2rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 0 20px;
+    }
+
+    footer {
+        padding: 40px 0 20px;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    /* Gallery responsive adjustments - single Glide.js gallery */
+    .gallery-container {
+        padding: 0.5rem;
+    }
+}

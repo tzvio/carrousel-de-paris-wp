@@ -1,0 +1,147 @@
+/* Header Styles */
+header {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    z-index: 2;
+}
+
+.header-text {
+    position: relative;
+    z-index: 10;
+    animation: fadeInUp 2s ease-out 2s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glow-text {
+    text-shadow:
+        0 0 20px gold,
+        0 0 40px gold,
+        2px 2px 4px black;
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow:
+            0 0 20px gold,
+            0 0 40px gold,
+            2px 2px 4px black;
+    }
+
+    to {
+        text-shadow:
+            0 0 30px gold,
+            0 0 60px gold,
+            0 0 80px rgba(255, 215, 0, 0.8),
+            2px 2px 4px black;
+    }
+}
+
+.header-logo {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(5%);
+    z-index: 1;
+    opacity: 0;
+    width: 180px;
+    height: auto;
+    animation: fadeIn 2s ease-out 1.5s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 0.9;
+    }
+}
+
+header h1 {
+    font-size: 3rem;
+    margin: 0;
+    font-family: 'Big Shoulders Display', sans-serif;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 4px black;
+}
+
+header h2 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin: 10px 0;
+    text-shadow: 1px 1px 2px black;
+}
+
+header>h1,
+header>h2 {
+    position: relative;
+    z-index: 1;
+}
+
+section {
+    padding: 4rem 2rem;
+    max-width: 1000px;
+    margin: auto;
+    position: relative;
+    z-index: 2;
+}
+
+.about {
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.visuals {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.dancer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: auto;
+    min-height: 120%;
+    opacity: 0.35;
+    z-index: -1;
+    object-fit: cover;
+}
+
+.phoenix,
+.lion {
+    position: absolute;
+    height: auto;
+    max-width: 30%;
+    bottom: 0;
+    z-index: 1;
+    opacity: 0.6;
+}
+
+.phoenix {
+    left: 0;
+    transform: translate(-10%, 5%);
+}
+
+.lion {
+    right: 0;
+    transform: translate(10%, 5%);
+}

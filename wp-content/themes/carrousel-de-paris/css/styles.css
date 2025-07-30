@@ -1,0 +1,17 @@
+/*
+Theme Name: Carrousel de Paris
+Author: Tzvika Ofek
+Description: Custom theme for Carrousel de Paris
+Version: 1.0
+*/
+
+@import url('variables.css');
+@import url('base.css');
+@import url('utilities.css');
+@import url('curtains.css');
+@import url('header.css');
+@import url('gallery.css');
+@import url('layout.css');
+@import url('forms.css');
+@import url('footer.css');
+@import url('mobile.css');

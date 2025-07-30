@@ -1,0 +1,9 @@
+/* Base Styles */
+body {
+    color: var(--primary-gold);
+    background: url('../images/stars_bg.webp') repeat;
+    background-color: var(--bg-dark);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
