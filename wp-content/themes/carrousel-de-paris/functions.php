@@ -367,7 +367,10 @@ function carrousel_get_gallery_images()
 {
     $gallery_images = array();
 
-    for ($i = 1; $i <= 6; $i++) {
+    // Get the number of gallery images from customizer
+    $gallery_count = get_theme_mod('carrousel_gallery_count', 6);
+
+    for ($i = 1; $i <= $gallery_count; $i++) {
         $image_url = get_theme_mod("carrousel_gallery_image_{$i}", '');
         if (!empty($image_url)) {
             $gallery_images[] = array(
@@ -764,11 +767,30 @@ function carrousel_customize_register($wp_customize)
     $wp_customize->add_section('carrousel_gallery', array(
         'title'    => __('Gallery Images', 'carrousel'),
         'priority' => 22,
-        'description' => __('Upload gallery images that will be displayed in the gallery section.', 'carrousel'),
+        'description' => __('Set the number of gallery images and upload them. Images will be displayed in the gallery section.', 'carrousel'),
     ));
 
-    // Gallery images (up to 6 images)
-    for ($i = 1; $i <= 6; $i++) {
+    // Number of gallery images setting
+    $wp_customize->add_setting('carrousel_gallery_count', array(
+        'default'           => 6,
+        'sanitize_callback' => 'absint',
+    ));
+
+    $wp_customize->add_control('carrousel_gallery_count', array(
+        'label'       => __('Number of Gallery Images', 'carrousel'),
+        'section'     => 'carrousel_gallery',
+        'type'        => 'number',
+        'description' => __('Choose how many gallery images you want (1-20). Save and refresh the customizer to see the image upload fields.', 'carrousel'),
+        'input_attrs' => array(
+            'min' => 1,
+            'max' => 20,
+            'step' => 1,
+        ),
+    ));
+
+    // Gallery images (dynamic number based on setting)
+    $gallery_count = get_theme_mod('carrousel_gallery_count', 6);
+    for ($i = 1; $i <= $gallery_count; $i++) {
         // Image setting
         $wp_customize->add_setting("carrousel_gallery_image_{$i}", array(
             'default'           => '',
