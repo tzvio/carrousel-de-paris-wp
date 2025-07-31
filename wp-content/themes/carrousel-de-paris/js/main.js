@@ -1,4 +1,4 @@
-jQuery(document).ready(function () {
+jQuery(document).ready(function ($) {
     // Wait for lightbox to be available
     if (typeof lightbox !== 'undefined') {
         // Configure lightbox options without image counter
@@ -70,18 +70,18 @@ jQuery(document).ready(function () {
         glide.mount();
 
         // Pause autoplay when lightbox is open
-        jQuery(document).on('click', '[data-lightbox^="carrousel-gallery-"]', function () {
+        $(document).on('click', '[data-lightbox^="carrousel-gallery-"]', function () {
             glide.pause();
         });
 
         // Resume autoplay when lightbox is closed
-        jQuery(document).on('lightbox:close', function () {
+        $(document).on('lightbox:close', function () {
             glide.play();
         });
     }
 
     // Contact form validation and submission
-    jQuery('#contactForm').on('submit', function (e) {
+    $('#contactForm').on('submit', function (e) {
         e.preventDefault();
         // Remove previous error messages
         $('.field-error').remove();
@@ -152,30 +152,27 @@ jQuery(document).ready(function () {
         const originalText = submitBtn.text();
         // Show loading state
         submitBtn.text('Envoi en cours...').prop('disabled', true);
-        // Send data to Formspree
-        fetch('https://formspree.io/f/xldnzzda', {
+
+        // Add WordPress AJAX action and nonce to form data
+        data.append('action', 'carrousel_contact_form');
+        data.append('nonce', carrousel_ajax.nonce);
+
+        // Send data to WordPress AJAX handler
+        fetch(carrousel_ajax.ajaxurl, {
             method: 'POST',
-            body: data,
-            headers: {
-                'Accept': 'application/json'
-            }
+            body: data
         })
-            .then(response => {
-                if (response.ok) {
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
                     // Reset form
                     $('#contactForm')[0].reset();
                     // Show success message
-                    showMessage('Votre message a été envoyé avec succès! Nous vous répondrons bientôt.', 'success');
+                    showMessage(data.message, 'success');
                     // Optional: scroll to top of contact section
                     $('.contact-section')[0].scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    return response.json().then(data => {
-                        let msg = 'Une erreur est survenue.';
-                        if (data.errors) {
-                            msg = data.errors.map(e => e.message).join(', ');
-                        }
-                        showMessage(msg, 'error');
-                    });
+                    showMessage(data.message, 'error');
                 }
             })
             .catch(() => {

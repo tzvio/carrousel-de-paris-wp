@@ -48,6 +48,60 @@ function carrousel_enqueue_assets()
 }
 add_action('wp_enqueue_scripts', 'carrousel_enqueue_assets');
 
+// Configure SMTP for email sending
+function carrousel_configure_smtp($phpmailer)
+{
+    // Only configure SMTP if not in local development mode
+    if (defined('CARROUSEL_LOCAL_EMAIL') && CARROUSEL_LOCAL_EMAIL) {
+        return;
+    }
+
+    $phpmailer->isSMTP();
+    $phpmailer->Host = 'smtp.gmail.com';
+    $phpmailer->SMTPAuth = true;
+    $phpmailer->Port = 587;
+    $phpmailer->SMTPSecure = 'tls'; // Use TLS encryption
+
+    // Get SMTP credentials from WordPress options or constants
+    $smtp_username = defined('SMTP_USERNAME') ? SMTP_USERNAME : get_option('carrousel_smtp_username');
+    $smtp_password = defined('SMTP_PASSWORD') ? SMTP_PASSWORD : get_option('carrousel_smtp_password');
+    $smtp_from_email = defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : get_option('carrousel_smtp_from_email');
+    $smtp_from_name = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : get_option('carrousel_smtp_from_name', get_bloginfo('name'));
+
+    if ($smtp_username && $smtp_password) {
+        $phpmailer->Username = $smtp_username;
+        $phpmailer->Password = $smtp_password;
+
+        // Set from email and name
+        if ($smtp_from_email) {
+            $phpmailer->From = $smtp_from_email;
+            $phpmailer->FromName = $smtp_from_name;
+        }
+
+        // Enable SMTP debugging (comment out in production)
+        // $phpmailer->SMTPDebug = 2; // Uncomment for debugging
+    } else {
+        error_log('SMTP credentials not configured for Carrousel de Paris');
+    }
+}
+add_action('phpmailer_init', 'carrousel_configure_smtp');
+
+// Override wp_mail from address if SMTP is configured
+function carrousel_mail_from($original_email_address)
+{
+    $smtp_from_email = defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : get_option('carrousel_smtp_from_email');
+    return $smtp_from_email ? $smtp_from_email : $original_email_address;
+}
+add_filter('wp_mail_from', 'carrousel_mail_from');
+
+// Override wp_mail from name if SMTP is configured
+function carrousel_mail_from_name($original_email_from)
+{
+    $smtp_from_name = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : get_option('carrousel_smtp_from_name');
+    return $smtp_from_name ? $smtp_from_name : $original_email_from;
+}
+add_filter('wp_mail_from_name', 'carrousel_mail_from_name');
+
 // Theme setup
 function carrousel_theme_setup()
 {
@@ -326,6 +380,9 @@ function carrousel_handle_contact_form_submission()
         $mail_sent = wp_mail($to, $email_subject, $email_message, $headers);
 
         if ($mail_sent) {
+            // Log successful email send
+            error_log("Contact form email sent successfully to: {$to}");
+
             // Send confirmation email to user
             $user_subject = 'Confirmation de réception - Carrousel de Paris';
             $user_message = "Bonjour {$first_name},\n\n";
@@ -341,10 +398,16 @@ function carrousel_handle_contact_form_submission()
                 'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
             );
 
-            wp_mail($email, $user_subject, $user_message, $user_headers);
+            $confirmation_sent = wp_mail($email, $user_subject, $user_message, $user_headers);
+
+            if (!$confirmation_sent) {
+                error_log("Failed to send confirmation email to: {$email}");
+            }
 
             wp_redirect(add_query_arg('contact', 'success', home_url()));
         } else {
+            // Log email failure
+            error_log("Failed to send contact form email from: {$email}");
             wp_redirect(add_query_arg('contact', 'error', home_url()));
         }
         exit;
@@ -969,6 +1032,129 @@ function carrousel_customize_register($wp_customize)
 }
 add_action('customize_register', 'carrousel_customize_register');
 
+// Add SMTP settings to WordPress admin
+function carrousel_smtp_admin_menu()
+{
+    add_options_page(
+        'SMTP Configuration',
+        'SMTP Settings',
+        'manage_options',
+        'carrousel-smtp',
+        'carrousel_smtp_admin_page'
+    );
+}
+add_action('admin_menu', 'carrousel_smtp_admin_menu');
+
+// SMTP settings page
+function carrousel_smtp_admin_page()
+{
+    if (isset($_POST['submit'])) {
+        // Save SMTP settings
+        update_option('carrousel_smtp_username', sanitize_text_field($_POST['smtp_username']));
+        update_option('carrousel_smtp_password', sanitize_text_field($_POST['smtp_password']));
+        update_option('carrousel_smtp_from_email', sanitize_email($_POST['smtp_from_email']));
+        update_option('carrousel_smtp_from_name', sanitize_text_field($_POST['smtp_from_name']));
+
+        echo '<div class="notice notice-success"><p>SMTP settings saved!</p></div>';
+    }
+
+    if (isset($_POST['test_email'])) {
+        // Send test email
+        $test_email = sanitize_email($_POST['test_email_address']);
+        if ($test_email) {
+            $subject = 'Test Email from Carrousel de Paris';
+            $message = 'This is a test email to verify SMTP configuration is working correctly.';
+            $sent = wp_mail($test_email, $subject, $message);
+
+            if ($sent) {
+                echo '<div class="notice notice-success"><p>Test email sent successfully to ' . esc_html($test_email) . '!</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Failed to send test email. Please check your SMTP settings.</p></div>';
+            }
+        }
+    }
+
+    // Get current settings
+    $smtp_username = get_option('carrousel_smtp_username', '');
+    $smtp_password = get_option('carrousel_smtp_password', '');
+    $smtp_from_email = get_option('carrousel_smtp_from_email', '');
+    $smtp_from_name = get_option('carrousel_smtp_from_name', get_bloginfo('name'));
+?>
+    <div class="wrap">
+        <h1>SMTP Configuration</h1>
+        <p>Configure Gmail SMTP settings for the contact form.</p>
+
+        <div style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #00a0d2;">
+            <h3>Gmail Setup Instructions:</h3>
+            <ol>
+                <li><strong>Enable 2-Step Verification</strong> on your Gmail account if not already enabled</li>
+                <li><strong>Generate an App Password:</strong>
+                    <ul>
+                        <li>Go to <a href="https://myaccount.google.com/security" target="_blank">Google Account Security</a></li>
+                        <li>Under "Signing in to Google", click "2-Step Verification"</li>
+                        <li>At the bottom, click "App passwords"</li>
+                        <li>Select "Mail" and "Other (custom name)" - enter "Carrousel de Paris"</li>
+                        <li>Copy the generated 16-character password</li>
+                    </ul>
+                </li>
+                <li><strong>Use the App Password</strong> (not your regular Gmail password) in the SMTP Password field below</li>
+            </ol>
+        </div>
+
+        <form method="post" action="">
+            <table class="form-table">
+                <tr>
+                    <th scope="row">SMTP Username (Gmail Address)</th>
+                    <td>
+                        <input type="email" name="smtp_username" value="<?php echo esc_attr($smtp_username); ?>" class="regular-text" placeholder="your-email@gmail.com" required />
+                        <p class="description">Your full Gmail address</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">SMTP Password (App Password)</th>
+                    <td>
+                        <input type="password" name="smtp_password" value="<?php echo esc_attr($smtp_password); ?>" class="regular-text" placeholder="16-character app password" required />
+                        <p class="description">Use the App Password generated from Google, not your regular password</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">From Email</th>
+                    <td>
+                        <input type="email" name="smtp_from_email" value="<?php echo esc_attr($smtp_from_email); ?>" class="regular-text" placeholder="contact@carrouseldeparis.fr" />
+                        <p class="description">Email address that emails will appear to come from (usually same as SMTP username)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">From Name</th>
+                    <td>
+                        <input type="text" name="smtp_from_name" value="<?php echo esc_attr($smtp_from_name); ?>" class="regular-text" placeholder="Carrousel de Paris" />
+                        <p class="description">Name that emails will appear to come from</p>
+                    </td>
+                </tr>
+            </table>
+
+            <?php submit_button('Save SMTP Settings'); ?>
+        </form>
+
+        <hr>
+
+        <h2>Test Email</h2>
+        <form method="post" action="">
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Send Test Email To</th>
+                    <td>
+                        <input type="email" name="test_email_address" class="regular-text" placeholder="test@example.com" required />
+                        <input type="submit" name="test_email" class="button" value="Send Test Email" />
+                        <p class="description">Send a test email to verify SMTP configuration</p>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+<?php
+}
+
 // Disable comments for one-page site (optional)
 function carrousel_disable_comments()
 {
@@ -1029,3 +1215,88 @@ function carrousel_clean_wp_head()
     remove_action('template_redirect', 'rest_output_link_header', 11);
 }
 add_action('init', 'carrousel_clean_wp_head');
+
+// Contact form AJAX handler
+function carrousel_handle_contact_form()
+{
+    // Check nonce for security
+    if (!wp_verify_nonce($_POST['nonce'], 'carrousel_nonce')) {
+        wp_die(json_encode(array('success' => false, 'message' => 'Erreur de sécurité.')));
+    }
+
+    // Sanitize and validate form data
+    $firstName = sanitize_text_field($_POST['firstName']);
+    $lastName = sanitize_text_field($_POST['lastName']);
+    $email = sanitize_email($_POST['email']);
+    $subject = sanitize_text_field($_POST['subject']);
+    $message = sanitize_textarea_field($_POST['message']);
+
+    // Validation
+    $errors = array();
+
+    if (empty($firstName)) {
+        $errors[] = 'Prénom est requis.';
+    }
+
+    if (empty($lastName)) {
+        $errors[] = 'Nom est requis.';
+    }
+
+    if (empty($email) || !is_email($email)) {
+        $errors[] = 'Adresse e-mail valide est requise.';
+    }
+
+    if (empty($subject)) {
+        $errors[] = 'Sujet est requis.';
+    }
+
+    if (empty($message)) {
+        $errors[] = 'Message est requis.';
+    }
+
+    // If there are validation errors, return them
+    if (!empty($errors)) {
+        wp_die(json_encode(array(
+            'success' => false,
+            'message' => implode(' ', $errors)
+        )));
+    }
+
+    // Prepare email
+    $to = get_option('admin_email'); // Send to site admin email
+    $email_subject = '[' . get_bloginfo('name') . '] ' . $subject;
+
+    $email_message = "Nouveau message de contact:\n\n";
+    $email_message .= "Nom: " . $firstName . " " . $lastName . "\n";
+    $email_message .= "Email: " . $email . "\n";
+    $email_message .= "Sujet: " . $subject . "\n\n";
+    $email_message .= "Message:\n" . $message . "\n\n";
+    $email_message .= "---\n";
+    $email_message .= "Envoyé depuis: " . home_url();
+
+    // Email headers
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>',
+        'Reply-To: ' . $firstName . ' ' . $lastName . ' <' . $email . '>'
+    );
+
+    // Send email using wp_mail
+    $mail_sent = wp_mail($to, $email_subject, $email_message, $headers);
+
+    if ($mail_sent) {
+        wp_die(json_encode(array(
+            'success' => true,
+            'message' => 'Votre message a été envoyé avec succès! Nous vous répondrons bientôt.'
+        )));
+    } else {
+        wp_die(json_encode(array(
+            'success' => false,
+            'message' => 'Une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer.'
+        )));
+    }
+}
+
+// Hook the function to wp_ajax_ and wp_ajax_nopriv_ for both logged-in and non-logged-in users
+add_action('wp_ajax_carrousel_contact_form', 'carrousel_handle_contact_form');
+add_action('wp_ajax_nopriv_carrousel_contact_form', 'carrousel_handle_contact_form');
