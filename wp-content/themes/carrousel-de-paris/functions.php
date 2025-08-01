@@ -360,7 +360,7 @@ function carrousel_handle_contact_form_submission()
         }
 
         // Prepare email
-        $to = get_option('admin_email');
+        $to = 'contact@carrouseldeparis.com';
         $email_subject = '[Carrousel de Paris] ' . $subject;
         $email_message = "Nouveau message depuis le site web:\n\n";
         $email_message .= "Nom: {$first_name} {$last_name}\n";
@@ -1263,7 +1263,7 @@ function carrousel_handle_contact_form()
     }
 
     // Prepare email
-    $to = get_option('admin_email'); // Send to site admin email
+    $to = 'contact@carrouseldeparis.com'; // Send to contact email
     $email_subject = '[' . get_bloginfo('name') . '] ' . $subject;
 
     $email_message = "Nouveau message de contact:\n\n";
