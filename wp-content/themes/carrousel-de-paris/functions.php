@@ -425,45 +425,42 @@ function carrousel_custom_image_sizes()
 }
 add_action('after_setup_theme', 'carrousel_custom_image_sizes');
 
-// Helper function to get gallery images
+// Helper function to get gallery images - now uses the Gallery Manager plugin
 function carrousel_get_gallery_images()
 {
-    $gallery_images = array();
+    // Check if Gallery Manager plugin is active and has items
+    if (function_exists('cgm_get_gallery_items')) {
+        $gallery_items = cgm_get_gallery_items();
 
-    // Get the number of gallery images from customizer
-    $gallery_count = get_theme_mod('carrousel_gallery_count', 6);
-
-    for ($i = 1; $i <= $gallery_count; $i++) {
-        $image_url = get_theme_mod("carrousel_gallery_image_{$i}", '');
-        if (!empty($image_url)) {
-            $gallery_images[] = array(
-                'src' => $image_url,
-                'alt' => get_theme_mod("carrousel_gallery_alt_{$i}", sprintf('Cabaret Performance %d', $i)),
-                'title' => get_theme_mod("carrousel_gallery_title_{$i}", sprintf('Cabaret Performance %d', $i))
-            );
+        if (!empty($gallery_items)) {
+            return $gallery_items;
         }
     }
 
-    // If no custom images, use default images
-    if (empty($gallery_images)) {
-        $gallery_images = array(
-            array(
-                'src' => get_template_directory_uri() . '/images/gallery/cabaret1.webp',
-                'alt' => 'Cabaret Performance 1',
-                'title' => 'Cabaret Performance 1'
-            ),
-            array(
-                'src' => get_template_directory_uri() . '/images/gallery/cabaret2.webp',
-                'alt' => 'Cabaret Performance 2',
-                'title' => 'Cabaret Performance 2'
-            ),
-            array(
-                'src' => get_template_directory_uri() . '/images/gallery/cabaret3.webp',
-                'alt' => 'Cabaret Performance 3',
-                'title' => 'Cabaret Performance 3'
-            )
-        );
-    }
+    // Fallback to default images if plugin is not active or no items exist
+    $gallery_images = array(
+        array(
+            'src' => get_template_directory_uri() . '/images/gallery/cabaret1.webp',
+            'alt' => 'Cabaret Performance 1',
+            'title' => 'Cabaret Performance 1',
+            'type' => 'image',
+            'is_video' => false
+        ),
+        array(
+            'src' => get_template_directory_uri() . '/images/gallery/cabaret2.webp',
+            'alt' => 'Cabaret Performance 2',
+            'title' => 'Cabaret Performance 2',
+            'type' => 'image',
+            'is_video' => false
+        ),
+        array(
+            'src' => get_template_directory_uri() . '/images/gallery/cabaret3.webp',
+            'alt' => 'Cabaret Performance 3',
+            'title' => 'Cabaret Performance 3',
+            'type' => 'image',
+            'is_video' => false
+        )
+    );
 
     return $gallery_images;
 }
@@ -826,69 +823,10 @@ function carrousel_customize_register($wp_customize)
         'type'    => 'url',
     ));
 
-    // Add gallery section
-    $wp_customize->add_section('carrousel_gallery', array(
-        'title'    => __('Gallery Images', 'carrousel'),
-        'priority' => 22,
-        'description' => __('Set the number of gallery images and upload them. Images will be displayed in the gallery section.', 'carrousel'),
-    ));
-
-    // Number of gallery images setting
-    $wp_customize->add_setting('carrousel_gallery_count', array(
-        'default'           => 6,
-        'sanitize_callback' => 'absint',
-    ));
-
-    $wp_customize->add_control('carrousel_gallery_count', array(
-        'label'       => __('Number of Gallery Images', 'carrousel'),
-        'section'     => 'carrousel_gallery',
-        'type'        => 'number',
-        'description' => __('Choose how many gallery images you want (1-20). Save and refresh the customizer to see the image upload fields.', 'carrousel'),
-        'input_attrs' => array(
-            'min' => 1,
-            'max' => 20,
-            'step' => 1,
-        ),
-    ));
-
-    // Gallery images (dynamic number based on setting)
-    $gallery_count = get_theme_mod('carrousel_gallery_count', 6);
-    for ($i = 1; $i <= $gallery_count; $i++) {
-        // Image setting
-        $wp_customize->add_setting("carrousel_gallery_image_{$i}", array(
-            'default'           => '',
-            'sanitize_callback' => 'esc_url_raw',
-        ));
-
-        $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, "carrousel_gallery_image_{$i}", array(
-            'label'   => sprintf(__('Gallery Image %d', 'carrousel'), $i),
-            'section' => 'carrousel_gallery',
-        )));
-
-        // Alt text setting
-        $wp_customize->add_setting("carrousel_gallery_alt_{$i}", array(
-            'default'           => sprintf('Cabaret Performance %d', $i),
-            'sanitize_callback' => 'sanitize_text_field',
-        ));
-
-        $wp_customize->add_control("carrousel_gallery_alt_{$i}", array(
-            'label'   => sprintf(__('Gallery Image %d Alt Text', 'carrousel'), $i),
-            'section' => 'carrousel_gallery',
-            'type'    => 'text',
-        ));
-
-        // Title setting
-        $wp_customize->add_setting("carrousel_gallery_title_{$i}", array(
-            'default'           => sprintf('Cabaret Performance %d', $i),
-            'sanitize_callback' => 'sanitize_text_field',
-        ));
-
-        $wp_customize->add_control("carrousel_gallery_title_{$i}", array(
-            'label'   => sprintf(__('Gallery Image %d Title', 'carrousel'), $i),
-            'section' => 'carrousel_gallery',
-            'type'    => 'text',
-        ));
-    }
+    // Gallery section is now managed by the Gallery Manager plugin
+    // Visit Gallery Manager in the admin menu to manage gallery items
+    // The gallery settings have been moved from the customizer to provide
+    // unlimited media items with drag-and-drop ordering functionality
 
     // Add section for footer content
     $wp_customize->add_section('carrousel_footer', array(

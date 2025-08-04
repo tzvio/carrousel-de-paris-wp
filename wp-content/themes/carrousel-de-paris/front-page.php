@@ -29,17 +29,39 @@
             <div class="glide__track" data-glide-el="track">
                 <ul class="glide__slides">
                     <?php
-                    // Get gallery images from custom field or use default
+                    // Get gallery items from Gallery Manager plugin or fallback to default
                     $gallery_images = carrousel_get_gallery_images();
 
-                    foreach ($gallery_images as $image): ?>
+                    foreach ($gallery_images as $item):
+                        $is_video = isset($item['is_video']) ? $item['is_video'] : false;
+                        $media_src = esc_url($item['src']);
+                        $media_title = esc_attr($item['title']);
+                        $media_alt = esc_attr($item['alt']);
+
+                        // For videos, use thumbnail for lightbox if available
+                        $lightbox_src = $is_video && isset($item['thumbnail']) ? esc_url($item['thumbnail']) : $media_src;
+                    ?>
                         <li class="glide__slide">
-                            <div class="gallery-item">
-                                <a href="<?php echo esc_url($image['src']); ?>" data-lightbox="cabaret-gallery"
-                                    data-title="<?php echo esc_attr($image['title']); ?>">
-                                    <img src="<?php echo esc_url($image['src']); ?>" alt="<?php echo esc_attr($image['alt']); ?>">
-                                    <div class="gallery-overlay"></div>
-                                </a>
+                            <div class="gallery-item <?php echo $is_video ? 'gallery-item-video' : 'gallery-item-image'; ?>">
+                                <?php if ($is_video): ?>
+                                    <!-- Video items don't use lightbox, just display inline -->
+                                    <div class="gallery-video-container">
+                                        <video controls muted preload="metadata">
+                                            <source src="<?php echo $media_src; ?>" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                        <div class="gallery-overlay">
+                                            <span class="gallery-play-icon">▶</span>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Image items use lightbox -->
+                                    <a href="<?php echo $lightbox_src; ?>" data-lightbox="cabaret-gallery"
+                                        data-title="<?php echo $media_title; ?>">
+                                        <img src="<?php echo $media_src; ?>" alt="<?php echo $media_alt; ?>">
+                                        <div class="gallery-overlay"></div>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </li>
                     <?php endforeach; ?>

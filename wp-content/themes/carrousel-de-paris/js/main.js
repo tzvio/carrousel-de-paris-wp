@@ -41,7 +41,7 @@ jQuery(document).ready(function ($) {
             type: 'carousel',
             startAt: 0,
             perView: 3,
-            focusAt: 'center',
+            focusAt: 0,
             gap: 30,
             autoplay: 4000,
             hoverpause: true,
@@ -51,7 +51,8 @@ jQuery(document).ready(function ($) {
             breakpoints: {
                 1024: {
                     perView: 2,
-                    gap: 20
+                    gap: 20,
+                    focusAt: 0
                 },
                 768: {
                     perView: 1,
@@ -68,6 +69,33 @@ jQuery(document).ready(function ($) {
 
         // Mount the gallery
         glide.mount();
+
+        // Video handling for gallery items
+        $('.gallery-video-container video').each(function () {
+            const video = this;
+            const overlay = $(this).siblings('.gallery-overlay');
+
+            // Pause video when not in view or when gallery moves
+            video.addEventListener('play', function () {
+                // Pause other videos when one starts playing
+                $('.gallery-video-container video').not(this).each(function () {
+                    this.pause();
+                });
+
+                // Pause gallery autoplay when video is playing
+                glide.pause();
+            });
+
+            video.addEventListener('pause', function () {
+                // Resume gallery autoplay when video is paused
+                glide.play();
+            });
+
+            video.addEventListener('ended', function () {
+                // Resume gallery autoplay when video ends
+                glide.play();
+            });
+        });
 
         // Pause autoplay when lightbox is open
         $(document).on('click', '[data-lightbox^="carrousel-gallery-"]', function () {
