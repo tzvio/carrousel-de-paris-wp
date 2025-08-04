@@ -51,13 +51,6 @@
                 <button class="glide__arrow glide__arrow--left" data-glide-dir="<">‹</button>
                 <button class="glide__arrow glide__arrow--right" data-glide-dir=">">›</button>
             </div>
-
-            <!-- Indicators/Bullets -->
-            <div class="glide__bullets" data-glide-el="controls[nav]">
-                <?php for ($i = 0; $i < count($gallery_images); $i++): ?>
-                    <button class="glide__bullet" data-glide-dir="=<?php echo $i; ?>"></button>
-                <?php endfor; ?>
-            </div>
         </div>
     </div>
 
